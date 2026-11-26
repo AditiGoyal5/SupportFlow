@@ -1,4 +1,4 @@
-import { ArrowRight, Clock3, ShieldCheck, Ticket } from 'lucide-react'
+import { ArrowRight, Clock3, Ticket } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 
@@ -8,7 +8,6 @@ function getFirstName(name) {
 
 export default function DashboardPage() {
   const { user } = useAuth()
-  const isAdmin = user.role === 'admin'
 
   return (
     <div className="space-y-7">
@@ -24,21 +23,19 @@ export default function DashboardPage() {
         <div className="relative z-10 max-w-2xl">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-indigo-100">
             <span className="size-1.5 rounded-full bg-emerald-400" />
-            {isAdmin ? 'ADMIN WORKSPACE' : 'YOUR SUPPORT WORKSPACE'}
+            YOUR SUPPORT WORKSPACE
           </div>
           <h2 className="text-3xl font-semibold tracking-[-0.05em] sm:text-[38px]">
             Good to see you, {getFirstName(user.name)}.
           </h2>
           <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:text-[15px]">
-            {isAdmin
-              ? 'Your team workspace is ready. Review the ticket queue and keep every request moving.'
-              : 'Your support workspace is ready. Follow your requests and stay up to date with the team.'}
+            Your support workspace is ready. Follow your requests and stay up to date with the team.
           </p>
           <Link
-            to={isAdmin ? '/app/admin' : '/app/tickets'}
+            to="/app/tickets"
             className="mt-6 inline-flex h-11 items-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-slate-900 transition hover:bg-indigo-50"
           >
-            {isAdmin ? 'Open admin dashboard' : 'Open my tickets'}
+            Open my tickets
             <ArrowRight size={16} />
           </Link>
         </div>
@@ -74,7 +71,7 @@ export default function DashboardPage() {
             title="Ticket workspace"
             description="Open the ticket area available for your account."
             to="/app/tickets"
-            action={isAdmin ? 'View queue' : 'View tickets'}
+            action="View tickets"
           />
           <OverviewCard
             icon={Clock3}
@@ -87,8 +84,8 @@ export default function DashboardPage() {
             icon={ShieldCheck}
             title="Account access"
             description={`Signed in as ${user.email}. Your ${user.role} permissions are active.`}
-            to={isAdmin ? '/app/admin' : '/app/tickets'}
-            action={isAdmin ? 'Admin tools' : 'Continue'}
+            to="/app/tickets"
+            action="Continue"
           />
         </div>
       </section>

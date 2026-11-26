@@ -8,7 +8,6 @@ const titles = {
   '/app': 'Dashboard',
   '/app/tickets': 'My tickets',
   '/app/tickets/new': 'Create ticket',
-  '/app/admin': 'Admin tickets',
   '/app/users': 'User management',
 }
 
@@ -17,9 +16,13 @@ export default function AppLayout() {
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const title =
-    (location.pathname === '/app/tickets' && user.role === 'admin'
-      ? 'All tickets'
-      : titles[location.pathname]) ??
+    (location.pathname === '/app'
+      ? user.role === 'admin'
+        ? 'Admin dashboard'
+        : titles[location.pathname]
+      : location.pathname === '/app/tickets' && user.role === 'admin'
+        ? 'All tickets'
+        : titles[location.pathname]) ??
     (location.pathname.startsWith('/app/tickets/') ? 'Ticket details' : 'SupportFlow')
 
   return (

@@ -507,9 +507,9 @@ export default function TicketDetailsPage() {
     return (
       <div className="mx-auto max-w-6xl space-y-5">
         <Button asChild variant="ghost" size="sm">
-          <Link to={isAdmin ? '/app/admin' : '/app/tickets'}>
+          <Link to="/app/tickets">
             <ArrowLeft className="h-4 w-4" />
-            Back to {isAdmin ? 'Admin Queue' : 'My Tickets'}
+            Back to {isAdmin ? 'All Tickets' : 'My Tickets'}
           </Link>
         </Button>
         <ErrorState
@@ -525,9 +525,9 @@ export default function TicketDetailsPage() {
     return (
       <div className="mx-auto max-w-6xl space-y-5">
         <Button asChild variant="ghost" size="sm">
-          <Link to={isAdmin ? '/app/admin' : '/app/tickets'}>
+          <Link to="/app/tickets">
             <ArrowLeft className="h-4 w-4" />
-            Back to {isAdmin ? 'Admin Queue' : 'My Tickets'}
+            Back to {isAdmin ? 'All Tickets' : 'My Tickets'}
           </Link>
         </Button>
         <EmptyState
@@ -551,8 +551,8 @@ export default function TicketDetailsPage() {
   const canManageAssignment =
     isAdmin || ticket.assigned_to === user?.id
   const ticketKey = formatTicketKey(ticket.id)
-  const backPath = isAdmin ? '/app/admin' : '/app/tickets'
-  const backLabel = isAdmin ? 'Admin Queue' : 'My Tickets'
+  const backPath = '/app/tickets'
+  const backLabel = isAdmin ? 'All Tickets' : 'My Tickets'
 
   return (
     <div className="mx-auto max-w-6xl space-y-5">

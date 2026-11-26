@@ -38,6 +38,11 @@ function HomeRedirect() {
   return <Navigate to={user ? '/app' : '/login'} replace />
 }
 
+function DashboardHome() {
+  const { user } = useAuth()
+  return user.role === 'admin' ? <AdminDashboardPage /> : <DashboardPage />
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -61,14 +66,14 @@ export default function App() {
         </Route>
         <Route element={<RequireAuth />}>
           <Route path="/app" element={<AppLayout />}>
-            <Route index element={<DashboardPage />} />
+            <Route index element={<DashboardHome />} />
             <Route element={<RequireRole role="user" />}>
               <Route path="tickets/new" element={<CreateTicketPage />} />
             </Route>
             <Route path="tickets/:id" element={<TicketDetailsPage />} />
             <Route path="tickets" element={<TicketWorkspacePage />} />
+            <Route path="admin" element={<Navigate to="/app" replace />} />
             <Route element={<RequireRole role="admin" />}>
-              <Route path="admin" element={<AdminDashboardPage />} />
               <Route path="users" element={<UserManagementPage />} />
             </Route>
           </Route>
