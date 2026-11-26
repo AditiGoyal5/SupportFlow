@@ -86,13 +86,6 @@ export default function AppSidebar({ user, open, onClose }) {
             </NavLink>
           ))}
         </nav>
-
-        <div className="mt-auto rounded-xl border border-indigo-100 bg-indigo-50/60 p-3.5">
-          <p className="text-xs font-semibold text-indigo-950">Support, made simple</p>
-          <p className="mt-1 text-[11px] leading-4 text-indigo-900/75">
-            Track issues in List or Board view and collaborate with your team.
-          </p>
-        </div>
       </aside>
     </>
   )

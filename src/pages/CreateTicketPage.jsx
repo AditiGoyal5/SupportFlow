@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ChevronRight, CornerDownLeft, Info, LoaderCircle } from 'lucide-react'
+import { ChevronRight, CornerDownLeft, LoaderCircle } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import PageHeader from '../components/PageHeader.jsx'
@@ -301,19 +301,6 @@ export default function CreateTicketPage() {
             </div>
           </Card>
 
-          <Card className="border-indigo-100 bg-indigo-50/60 p-5">
-            <div className="flex gap-2.5">
-              <Info className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600" aria-hidden="true" />
-              <div className="space-y-2 text-xs leading-5 text-indigo-950/80">
-                <p className="font-semibold text-indigo-950">A good ticket is specific</p>
-                <ul className="list-inside list-disc space-y-1">
-                  <li>Mention what you expected to happen.</li>
-                  <li>Include any error message you saw.</li>
-                  <li>Add steps to reproduce the issue.</li>
-                </ul>
-              </div>
-            </div>
-          </Card>
         </aside>
       </form>
     </div>

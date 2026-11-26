@@ -10,7 +10,7 @@ import {
   Tag,
   UserRound,
 } from 'lucide-react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import EmptyState from '../components/EmptyState.jsx'
 import ErrorState from '../components/ErrorState.jsx'
@@ -40,7 +40,16 @@ import { Textarea } from '../components/ui/textarea.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import api from '../lib/api.js'
 import { getApiErrorMessage } from '../lib/api-error.js'
+import { CATEGORY_LABELS } from '../lib/tickets.js'
 import { cn, formatTicketKey } from '../lib/utils.js'
+
+function formatEnumLabel(value, meta) {
+  if (value === null || value === undefined || value === '') return 'unknown'
+  if (meta?.[value]?.label) return meta[value].label
+  return String(value)
+    .replace(/_/g, ' ')
+    .replace(/^./, (character) => character.toUpperCase())
+}
 
 function formatDate(value) {
   const date = new Date(value)
@@ -66,7 +75,11 @@ function getCommentAuthorRole(comment, ticket, user) {
     return user.role === 'admin' ? 'Admin' : 'User'
   }
 
-  return comment.author_user_id === ticket.user_id ? 'User' : 'Admin'
+  if (comment.author_user_id === ticket.assigned_to) {
+    return ticket.assignee_role === 'admin' ? 'Admin' : 'User'
+  }
+
+  return null
 }
 
 function getRequestError(error, resource) {
@@ -100,22 +113,36 @@ function getActivityDescription(activity) {
       return `${actor} created this ticket`
     case 'ticket.updated': {
       if (metadata.oldPriority && metadata.newPriority) {
-        return `${actor} changed priority from ${metadata.oldPriority} to ${metadata.newPriority}`
+        return `${actor} changed priority from ${formatEnumLabel(metadata.oldPriority, PRIORITY_META)} to ${formatEnumLabel(metadata.newPriority, PRIORITY_META)}`
       }
 
       const fields = Array.isArray(metadata.changedFields)
-        ? metadata.changedFields.join(', ')
+        ? metadata.changedFields.map((field) => formatEnumLabel(field)).join(', ')
         : ''
       return fields
         ? `${actor} updated ${fields}`
         : `${actor} updated this ticket`
     }
     case 'ticket.status_changed':
-      return `${actor} changed status from ${metadata.oldStatus ?? 'unknown'} to ${metadata.newStatus ?? 'unknown'}`
+      return `${actor} changed status from ${formatEnumLabel(metadata.oldStatus, STATUS_META)} to ${formatEnumLabel(metadata.newStatus, STATUS_META)}`
     case 'ticket.resolved':
       return `${actor} marked this ticket as resolved`
     case 'comment.added':
       return `${actor} added a comment`
+    case 'ticket.assigned': {
+      const previousAssignee = metadata.previousAssigneeName
+      const newAssignee = metadata.newAssigneeName
+      if (!previousAssignee && newAssignee) {
+        return `${actor} assigned this ticket to ${newAssignee}`
+      }
+      if (previousAssignee && newAssignee) {
+        return `${actor} reassigned this ticket from ${previousAssignee} to ${newAssignee}`
+      }
+      if (previousAssignee) {
+        return `${actor} unassigned ${previousAssignee} from this ticket`
+      }
+      return `${actor} updated the assignee`
+    }
     default:
       return `${actor} updated this ticket`
   }
@@ -171,9 +198,12 @@ function ListSkeleton({ rows = 3 }) {
 
 export default function TicketDetailsPage() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const { user } = useAuth()
   const isAdmin = user?.role === 'admin'
   const [ticket, setTicket] = useState(null)
+  const [directoryUsers, setDirectoryUsers] = useState([])
+  const [directoryUsersError, setDirectoryUsersError] = useState('')
   const [ticketLoading, setTicketLoading] = useState(true)
   const [ticketError, setTicketError] = useState(null)
   const [comments, setComments] = useState([])
@@ -188,6 +218,11 @@ export default function TicketDetailsPage() {
   const submittingCommentRef = useRef(false)
   const commentsRequestId = useRef(0)
   const [updatingField, setUpdatingField] = useState(false)
+  const [assignableUsers, setAssignableUsers] = useState([])
+  const [assignableUsersLoading, setAssignableUsersLoading] = useState(false)
+  const [assignableUsersError, setAssignableUsersError] = useState('')
+  const [assignmentBusy, setAssignmentBusy] = useState(false)
+  const assignableUsersRequestId = useRef(0)
   const [ticketRetry, setTicketRetry] = useState(0)
   const [commentsRetry, setCommentsRetry] = useState(0)
   const [activityRetry, setActivityRetry] = useState(0)
@@ -219,6 +254,34 @@ export default function TicketDetailsPage() {
     }
   }, [id])
 
+  const loadAssignableUsers = useCallback(async (
+    ticketId = id,
+    { signal } = {},
+  ) => {
+    const requestId = ++assignableUsersRequestId.current
+    setAssignableUsersLoading(true)
+    setAssignableUsersError('')
+    try {
+      const { data } = await api.get(
+        `/tickets/${ticketId}/assignable-users`,
+        { signal },
+      )
+      if (requestId === assignableUsersRequestId.current) {
+        setAssignableUsers(Array.isArray(data.users) ? data.users : [])
+      }
+    } catch (error) {
+      if (requestId === assignableUsersRequestId.current && !signal?.aborted) {
+        setAssignableUsersError(
+          getApiErrorMessage(error, 'Could not load assignable users.'),
+        )
+      }
+    } finally {
+      if (requestId === assignableUsersRequestId.current) {
+        setAssignableUsersLoading(false)
+      }
+    }
+  }, [id])
+
   const loadActivity = useCallback(async () => {
     setActivityLoading(true)
     setActivityError(null)
@@ -240,6 +303,7 @@ export default function TicketDetailsPage() {
   useEffect(() => {
     let active = true
     const commentsController = new AbortController()
+    const assigneesController = new AbortController()
     setTicket(null)
     setTicketLoading(true)
     setTicketError(null)
@@ -247,14 +311,21 @@ export default function TicketDetailsPage() {
     setCommentsLoading(false)
     setCommentsError(null)
     setActivity([])
+    setAssignableUsers([])
+    setAssignableUsersLoading(false)
+    setAssignableUsersError('')
 
     api
       .get(`/tickets/${id}`)
       .then(({ data }) => {
         if (!active) return
-        setTicket(data.ticket)
+        const loadedTicket = data.ticket
+        setTicket(loadedTicket)
         loadComments({ signal: commentsController.signal })
         loadActivity()
+        if (isAdmin || loadedTicket.assigned_to === user?.id) {
+          loadAssignableUsers(id, { signal: assigneesController.signal })
+        }
       })
       .catch((error) => {
         if (active) setTicketError(getRequestError(error, 'ticket'))
@@ -267,8 +338,18 @@ export default function TicketDetailsPage() {
       active = false
       commentsController.abort()
       commentsRequestId.current += 1
+      assigneesController.abort()
+      assignableUsersRequestId.current += 1
     }
-  }, [id, ticketRetry, loadComments, loadActivity])
+  }, [
+    id,
+    ticketRetry,
+    loadComments,
+    loadActivity,
+    loadAssignableUsers,
+    isAdmin,
+    user?.id,
+  ])
 
   useEffect(() => {
     if (ticket && commentsRetry > 0) loadComments()
@@ -277,6 +358,29 @@ export default function TicketDetailsPage() {
   useEffect(() => {
     if (ticket && activityRetry > 0) loadActivity()
   }, [ticket, activityRetry, loadActivity])
+
+  useEffect(() => {
+    if (!isAdmin || !ticket) return undefined
+
+    const controller = new AbortController()
+    setDirectoryUsersError('')
+    api
+      .get('/admin/users', { signal: controller.signal })
+      .then(({ data }) => {
+        if (!controller.signal.aborted) {
+          setDirectoryUsers(Array.isArray(data.users) ? data.users : [])
+        }
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) {
+          setDirectoryUsersError(
+            getApiErrorMessage(error, 'Could not load reporter details.'),
+          )
+        }
+      })
+
+    return () => controller.abort()
+  }, [isAdmin, ticket?.created_by, ticket?.user_id])
 
   async function handleCommentSubmit(event) {
     event.preventDefault()
@@ -352,6 +456,50 @@ export default function TicketDetailsPage() {
     }
   }
 
+  async function updateAssignee(assignedTo) {
+    if (!ticket) return
+
+    setAssignmentBusy(true)
+    setAssignableUsersError('')
+    try {
+      const { data } = await api.patch(`/tickets/${ticket.id}/assign`, {
+        assigned_to: assignedTo,
+      })
+      if (!data?.ticket) {
+        toast.error('The server returned an invalid assignment response.')
+        return
+      }
+
+      const updatedTicket = data.ticket
+      setTicket(updatedTicket)
+      toast.success(
+        assignedTo
+          ? `Ticket assigned to ${updatedTicket.assignee_name || 'the selected user'}.`
+          : 'Ticket unassigned.',
+      )
+
+      if (!isAdmin && updatedTicket.assigned_to !== user?.id) {
+        assignableUsersRequestId.current += 1
+        setAssignableUsers([])
+        if (updatedTicket.created_by !== user?.id) {
+          navigate('/app/tickets')
+        }
+      } else {
+        loadAssignableUsers(ticket.id)
+        loadActivity()
+      }
+    } catch (requestError) {
+      const message = getApiErrorMessage(
+        requestError,
+        'Could not update the ticket assignment.',
+      )
+      setAssignableUsersError(message)
+      toast.error(message)
+    } finally {
+      setAssignmentBusy(false)
+    }
+  }
+
   if (ticketLoading) return <TicketLoadingSkeleton />
 
   if (ticketError) {
@@ -390,12 +538,18 @@ export default function TicketDetailsPage() {
     )
   }
 
+  const isOwnTicket = (ticket.created_by ?? ticket.user_id) === user?.id
+  const reporter = directoryUsers.find(
+    (candidate) => candidate.id === (ticket.created_by ?? ticket.user_id),
+  )
   const creatorName =
-    ticket.creator_name ??
-    (ticket.user_id === user?.id ? user.name : 'Ticket creator')
+    ticket.creator_name ?? reporter?.name ?? (isOwnTicket ? user.name : 'Ticket creator')
+  const creatorEmail =
+    ticket.creator_email ?? reporter?.email ?? (isOwnTicket ? user.email : '')
   const creatorDetail =
-    ticket.creator_email ??
-    (ticket.user_id === user?.id ? user.email : ticket.user_id)
+    creatorEmail && !/^[0-9a-f-]{36}$/i.test(creatorEmail) ? creatorEmail : ''
+  const canManageAssignment =
+    isAdmin || ticket.assigned_to === user?.id
   const ticketKey = formatTicketKey(ticket.id)
   const backPath = isAdmin ? '/app/admin' : '/app/tickets'
   const backLabel = isAdmin ? 'Admin Queue' : 'My Tickets'
@@ -437,9 +591,10 @@ export default function TicketDetailsPage() {
                   <Badge variant="secondary" className="font-mono text-[11px] font-semibold">
                     {ticketKey}
                   </Badge>
-                  <Badge variant="outline" className="capitalize text-[11px] font-medium">
+                  <Badge variant="outline" className="text-[11px] font-medium">
                     <Tag className="h-3 w-3 text-muted-foreground" />
-                    {ticket.category || 'General'}
+                    {CATEGORY_LABELS[ticket.category] ??
+                      formatEnumLabel(ticket.category ?? 'general')}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
@@ -687,8 +842,9 @@ export default function TicketDetailsPage() {
 
               <div className="flex items-center justify-between gap-4 py-3.5">
                 <span className="text-xs font-medium text-muted-foreground">Category</span>
-                <Badge variant="secondary" className="font-medium capitalize">
-                  {ticket.category || 'General'}
+                <Badge variant="secondary" className="font-medium">
+                  {CATEGORY_LABELS[ticket.category] ??
+                    formatEnumLabel(ticket.category ?? 'general')}
                 </Badge>
               </div>
 
@@ -707,9 +863,78 @@ export default function TicketDetailsPage() {
                         {creatorDetail}
                       </p>
                     )}
+                    {!creatorDetail && directoryUsersError && (
+                      <p className="text-[11px] text-destructive">
+                        Reporter details unavailable
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
+
+              <div className="flex items-start justify-between gap-4 py-3.5">
+                <span className="pt-2 text-xs font-medium text-muted-foreground">
+                  Assignee
+                </span>
+                {canManageAssignment && !assignableUsersError ? (
+                  <Select
+                    value={ticket.assigned_to ?? 'unassigned'}
+                    disabled={assignmentBusy || assignableUsersLoading}
+                    onValueChange={(value) =>
+                      updateAssignee(value === 'unassigned' ? null : value)
+                    }
+                  >
+                    <SelectTrigger
+                      aria-label="Ticket assignee"
+                      className="h-8 w-[180px] text-xs font-medium"
+                    >
+                      <SelectValue
+                        placeholder={
+                          assignableUsersLoading ? 'Loading users…' : 'Unassigned'
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {isAdmin && (
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
+                      )}
+                      {assignableUsers.map((assignee) => (
+                        <SelectItem key={assignee.id} value={assignee.id}>
+                          {assignee.name} · {assignee.role}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="min-w-0 text-right">
+                    <p className="truncate text-xs font-semibold text-foreground">
+                      {ticket.assignee_name ||
+                        (ticket.assigned_to ? 'Assigned user' : 'Unassigned')}
+                    </p>
+                    {ticket.assignee_role && (
+                      <p className="text-[11px] capitalize text-muted-foreground">
+                        {ticket.assignee_role}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+              {canManageAssignment && assignableUsersError && (
+                <div
+                  role="alert"
+                  className="flex items-center justify-between gap-3 pb-3.5 text-xs text-destructive"
+                >
+                  <span>{assignableUsersError}</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="xs"
+                    onClick={() => loadAssignableUsers(ticket.id)}
+                  >
+                    Retry
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 

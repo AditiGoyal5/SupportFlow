@@ -192,6 +192,7 @@ export default function TicketList({
   function renderRow(ticket) {
     const busy = busyIds?.has(ticket.id) ?? false
     const requesterName = ticket.creator_name || ticket.creator_email || 'Unknown'
+    const assigneeName = ticket.assignee_name || 'Unassigned'
 
     return (
       <TableRow key={ticket.id} aria-busy={busy} className={cn('group', busy && 'opacity-60')}>
@@ -244,6 +245,30 @@ export default function TicketList({
           >
             {CATEGORY_LABELS[ticket.category] ?? ticket.category ?? 'General'}
           </Badge>
+        </TableCell>
+
+        <TableCell className="w-[160px] py-2 align-top">
+          {ticket.assignee_name ? (
+            <div className="flex min-w-0 items-center gap-2">
+              <Avatar className="h-6 w-6" role="img" aria-label={assigneeName}>
+                <AvatarFallback className="text-[10px]">
+                  {getInitials(assigneeName)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <p className="truncate text-xs font-medium text-foreground">
+                  {assigneeName}
+                </p>
+                {ticket.assignee_role && (
+                  <p className="text-[10px] capitalize text-muted-foreground">
+                    {ticket.assignee_role}
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <span className="text-xs text-muted-foreground">Unassigned</span>
+          )}
         </TableCell>
 
         {admin && (
@@ -340,6 +365,7 @@ export default function TicketList({
             <SortableHead label="Status" field="status" sort={sort} onSortChange={onSortChange} />
             <SortableHead label="Priority" field="priority" sort={sort} onSortChange={onSortChange} />
             <SortableHead label="Category" field="category" sort={sort} onSortChange={onSortChange} />
+            <TableHead scope="col" className="w-[160px]">Assignee</TableHead>
             {admin && <TableHead scope="col" className="w-[170px]">Requester</TableHead>}
             <SortableHead label="Updated" field="updated_at" sort={sort} onSortChange={onSortChange} className="w-[100px]" />
             <TableHead scope="col" className="w-[60px] pr-4 text-right">
