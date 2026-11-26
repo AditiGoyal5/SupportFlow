@@ -9,6 +9,7 @@ const titles = {
   '/app/tickets': 'My tickets',
   '/app/tickets/new': 'Create ticket',
   '/app/admin': 'Admin tickets',
+  '/app/users': 'User management',
 }
 
 export default function AppLayout() {

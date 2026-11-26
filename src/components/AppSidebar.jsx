@@ -1,4 +1,4 @@
-import { LayoutDashboard, Plus, ShieldCheck, Ticket } from 'lucide-react'
+import { LayoutDashboard, Plus, ShieldCheck, Ticket, Users } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import Brand from './Brand.jsx'
 
@@ -13,7 +13,10 @@ export default function AppSidebar({ user, open, onClose }) {
     },
     { label: 'Create Ticket', to: '/app/tickets/new', icon: Plus },
     ...(user.role === 'admin'
-      ? [{ label: 'Admin Tickets', to: '/app/admin', icon: ShieldCheck }]
+      ? [
+          { label: 'Admin Tickets', to: '/app/admin', icon: ShieldCheck },
+          { label: 'User Management', to: '/app/users', icon: Users },
+        ]
       : []),
   ]
 

@@ -10,6 +10,7 @@ import LoginPage from './pages/LoginPage.jsx'
 import RegisterPage from './pages/RegisterPage.jsx'
 import TicketDetailsPage from './pages/TicketDetailsPage.jsx'
 import TicketWorkspacePage from './pages/TicketWorkspacePage.jsx'
+import UserManagementPage from './pages/UserManagementPage.jsx'
 
 function RequireAuth() {
   const { user, loading } = useAuth()
@@ -66,6 +67,7 @@ export default function App() {
             <Route path="tickets" element={<TicketWorkspacePage />} />
             <Route element={<RequireRole role="admin" />}>
               <Route path="admin" element={<AdminDashboardPage />} />
+              <Route path="users" element={<UserManagementPage />} />
             </Route>
           </Route>
         </Route>
