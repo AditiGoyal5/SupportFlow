@@ -4,9 +4,11 @@ import { useAuth } from './context/AuthContext.jsx'
 import AppLayout from './components/AppLayout.jsx'
 import LoadingScreen from './components/LoadingScreen.jsx'
 import AdminDashboardPage from './pages/AdminDashboardPage.jsx'
+import CreateTicketPage from './pages/CreateTicketPage.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import RegisterPage from './pages/RegisterPage.jsx'
+import TicketDetailsPage from './pages/TicketDetailsPage.jsx'
 import TicketWorkspacePage from './pages/TicketWorkspacePage.jsx'
 
 function RequireAuth() {
@@ -59,6 +61,8 @@ export default function App() {
         <Route element={<RequireAuth />}>
           <Route path="/app" element={<AppLayout />}>
             <Route index element={<DashboardPage />} />
+            <Route path="tickets/new" element={<CreateTicketPage />} />
+            <Route path="tickets/:id" element={<TicketDetailsPage />} />
             <Route path="tickets" element={<TicketWorkspacePage />} />
             <Route element={<RequireRole role="admin" />}>
               <Route path="admin" element={<AdminDashboardPage />} />

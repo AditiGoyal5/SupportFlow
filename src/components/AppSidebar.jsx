@@ -1,17 +1,19 @@
-import { LayoutDashboard, ShieldCheck, Ticket } from 'lucide-react'
+import { LayoutDashboard, Plus, ShieldCheck, Ticket } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import Brand from './Brand.jsx'
 
 export default function AppSidebar({ user, open, onClose }) {
   const navigation = [
-    { label: 'Overview', to: '/app', icon: LayoutDashboard, end: true },
+    { label: 'Dashboard', to: '/app', icon: LayoutDashboard, end: true },
     {
-      label: user.role === 'admin' ? 'Ticket queue' : 'My tickets',
+      label: 'My Tickets',
       to: '/app/tickets',
       icon: Ticket,
+      end: true,
     },
+    { label: 'Create Ticket', to: '/app/tickets/new', icon: Plus },
     ...(user.role === 'admin'
-      ? [{ label: 'Admin dashboard', to: '/app/admin', icon: ShieldCheck }]
+      ? [{ label: 'Admin Tickets', to: '/app/admin', icon: ShieldCheck }]
       : []),
   ]
 
@@ -74,13 +76,10 @@ export default function AppSidebar({ user, open, onClose }) {
           ))}
         </nav>
 
-        <div className="mt-auto rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <div className="mb-2 flex items-center gap-2">
-            <span className="size-2 rounded-full bg-emerald-500" />
-            <p className="text-xs font-semibold text-slate-700">Workspace connected</p>
-          </div>
-          <p className="text-xs leading-5 text-slate-500">
-            Your account is ready. Ticket tools are available from the workspace navigation.
+        <div className="mt-auto rounded-2xl border border-indigo-100 bg-indigo-50/70 p-4">
+          <p className="text-xs font-semibold text-indigo-900">Support, made simple</p>
+          <p className="mt-1.5 text-xs leading-5 text-indigo-800/75">
+            Keep your requests and team updates together in one workspace.
           </p>
         </div>
       </aside>

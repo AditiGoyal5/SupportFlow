@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import api, { TOKEN_STORAGE_KEY } from '../lib/api.js'
+import api, { AUTH_EXPIRED_EVENT, TOKEN_STORAGE_KEY } from '../lib/api.js'
 import { getApiErrorMessage } from '../lib/api-error.js'
 
 const AuthContext = createContext(null)
@@ -20,12 +20,21 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let active = true
+    const handleAuthExpired = () => {
+      window.localStorage.removeItem(TOKEN_STORAGE_KEY)
+      setUser(null)
+      setLoading(false)
+      toast.error('Your session has expired. Please sign in again.')
+    }
+
+    window.addEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired)
     const token = window.localStorage.getItem(TOKEN_STORAGE_KEY)
 
     if (!token) {
       setLoading(false)
       return () => {
         active = false
+        window.removeEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired)
       }
     }
 
@@ -38,8 +47,6 @@ export function AuthProvider({ children }) {
         if (!active) return
 
         if (error.response?.status === 401) {
-          window.localStorage.removeItem(TOKEN_STORAGE_KEY)
-          toast.error('Your session has expired. Please sign in again.')
           return
         }
 
@@ -53,6 +60,7 @@ export function AuthProvider({ children }) {
 
     return () => {
       active = false
+      window.removeEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired)
     }
   }, [])
 

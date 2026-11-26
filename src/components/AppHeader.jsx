@@ -1,5 +1,6 @@
-import { LogOut, Menu } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Bell, LogOut, Menu, Search } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext.jsx'
 
@@ -15,6 +16,19 @@ function initials(name = '') {
 export default function AppHeader({ title, onMenuClick }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const activeSearch = searchParams.get('search') ?? ''
+  const [searchValue, setSearchValue] = useState(activeSearch)
+
+  useEffect(() => {
+    setSearchValue(activeSearch)
+  }, [activeSearch])
+
+  function handleSearch(event) {
+    event.preventDefault()
+    const search = searchValue.trim()
+    navigate(search ? `/app/tickets?search=${encodeURIComponent(search)}` : '/app/tickets')
+  }
 
   function handleLogout() {
     logout()
@@ -43,7 +57,35 @@ export default function AppHeader({ title, onMenuClick }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5 sm:gap-4">
+      <form
+        role="search"
+        onSubmit={handleSearch}
+        className="relative mx-6 hidden w-full max-w-[360px] flex-1 md:block"
+      >
+        <Search
+          aria-hidden="true"
+          size={17}
+          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+        />
+        <input
+          type="search"
+          aria-label="Search tickets"
+          placeholder="Search tickets..."
+          value={searchValue}
+          onChange={(event) => setSearchValue(event.target.value)}
+          className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-300 focus:bg-white focus:ring-4 focus:ring-indigo-100/70"
+        />
+      </form>
+
+      <div className="flex shrink-0 items-center gap-2.5 sm:gap-4">
+        <button
+          type="button"
+          aria-label="Notifications"
+          className="relative grid size-10 place-items-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+        >
+          <Bell size={19} strokeWidth={1.8} />
+        </button>
+        <span className="hidden h-8 w-px bg-slate-200 sm:block" />
         <div className="hidden items-center gap-3 sm:flex">
           <span className="grid size-10 place-items-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700">
             {initials(user.name)}
@@ -56,7 +98,6 @@ export default function AppHeader({ title, onMenuClick }) {
         <span className="grid size-9 place-items-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700 sm:hidden">
           {initials(user.name)}
         </span>
-        <span className="hidden h-8 w-px bg-slate-200 sm:block" />
         <button
           type="button"
           onClick={handleLogout}

@@ -5,16 +5,19 @@ import AppHeader from './AppHeader.jsx'
 import AppSidebar from './AppSidebar.jsx'
 
 const titles = {
-  '/app': 'Overview',
-  '/app/tickets': 'Ticket workspace',
-  '/app/admin': 'Admin dashboard',
+  '/app': 'Dashboard',
+  '/app/tickets': 'My tickets',
+  '/app/tickets/new': 'Create ticket',
+  '/app/admin': 'Admin tickets',
 }
 
 export default function AppLayout() {
   const { user } = useAuth()
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const title = titles[location.pathname] ?? 'SupportFlow'
+  const title =
+    titles[location.pathname] ??
+    (location.pathname.startsWith('/app/tickets/') ? 'Ticket details' : 'SupportFlow')
 
   return (
     <div className="min-h-screen bg-[#f7f8fc]">
