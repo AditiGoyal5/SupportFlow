@@ -17,7 +17,9 @@ export default function AppLayout() {
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const title =
-    titles[location.pathname] ??
+    (location.pathname === '/app/tickets' && user.role === 'admin'
+      ? 'All tickets'
+      : titles[location.pathname]) ??
     (location.pathname.startsWith('/app/tickets/') ? 'Ticket details' : 'SupportFlow')
 
   return (

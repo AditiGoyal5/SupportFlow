@@ -8,8 +8,15 @@ import { cn } from '../lib/utils.js'
 export default function AppSidebar({ user, open, onClose }) {
   const navigation = [
     { label: 'Dashboard', to: '/app', icon: LayoutDashboard, end: true },
-    { label: 'My Tickets', to: '/app/tickets', icon: Ticket, end: true },
-    { label: 'Create Ticket', to: '/app/tickets/new', icon: Plus },
+    {
+      label: user.role === 'admin' ? 'All Tickets' : 'My Tickets',
+      to: '/app/tickets',
+      icon: Ticket,
+      end: true,
+    },
+    ...(user.role !== 'admin'
+      ? [{ label: 'Create Ticket', to: '/app/tickets/new', icon: Plus }]
+      : []),
     ...(user.role === 'admin'
       ? [
           { label: 'Admin Queue', to: '/app/admin', icon: ShieldCheck },

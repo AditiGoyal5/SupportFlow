@@ -3,18 +3,14 @@ import {
   CheckCircle2,
   CircleDot,
   Clock3,
-  Plus,
   ShieldCheck,
   Ticket,
 } from 'lucide-react'
-import toast from 'react-hot-toast'
 import ErrorState from '../components/ErrorState.jsx'
 import PageHeader from '../components/PageHeader.jsx'
-import QuickCreateTicketDialog from '../components/QuickCreateTicketDialog.jsx'
 import TicketQueryBar from '../components/TicketQueryBar.jsx'
 import TicketResults from '../components/TicketResults.jsx'
 import { Badge } from '../components/ui/badge.jsx'
-import { Button } from '../components/ui/button.jsx'
 import { Card } from '../components/ui/card.jsx'
 import { Skeleton } from '../components/ui/skeleton.jsx'
 import useTicketQuery from '../hooks/useTicketQuery.js'
@@ -52,7 +48,6 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null)
   const [statsLoading, setStatsLoading] = useState(true)
   const [statsError, setStatsError] = useState('')
-  const [quickCreateOpen, setQuickCreateOpen] = useState(false)
 
   const loadStats = useCallback(async () => {
     setStatsLoading(true)
@@ -88,10 +83,6 @@ export default function AdminDashboardPage() {
               <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
               Admin workspace
             </Badge>
-            <Button type="button" size="sm" onClick={() => setQuickCreateOpen(true)}>
-              <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-              New ticket
-            </Button>
           </div>
         }
       />
@@ -152,21 +143,10 @@ export default function AdminDashboardPage() {
         <TicketResults
           query={query}
           admin
-          onCreate={() => setQuickCreateOpen(true)}
           emptyTitle="No tickets in the queue"
           emptyDescription="Tickets will appear here when customers submit requests."
         />
       </section>
-
-      <QuickCreateTicketDialog
-        open={quickCreateOpen}
-        onOpenChange={setQuickCreateOpen}
-        onCreated={() => {
-          toast.success('Ticket created.')
-          query.reload()
-          loadStats()
-        }}
-      />
     </div>
   )
 }

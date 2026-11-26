@@ -62,7 +62,9 @@ export default function App() {
         <Route element={<RequireAuth />}>
           <Route path="/app" element={<AppLayout />}>
             <Route index element={<DashboardPage />} />
-            <Route path="tickets/new" element={<CreateTicketPage />} />
+            <Route element={<RequireRole role="user" />}>
+              <Route path="tickets/new" element={<CreateTicketPage />} />
+            </Route>
             <Route path="tickets/:id" element={<TicketDetailsPage />} />
             <Route path="tickets" element={<TicketWorkspacePage />} />
             <Route element={<RequireRole role="admin" />}>

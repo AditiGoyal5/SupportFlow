@@ -30,12 +30,12 @@ export default function TicketWorkspacePage() {
             ? 'Triage, prioritize, and resolve support issues across your workspace.'
             : 'Track your support requests, switch between list and board views, and follow updates.'
         }
-        action={
+        action={!isAdmin && (
           <Button type="button" size="sm" onClick={() => setQuickCreateOpen(true)}>
             <Plus className="h-3.5 w-3.5" aria-hidden="true" />
             New ticket
           </Button>
-        }
+        )}
       />
 
       <TicketQueryBar query={query} />
@@ -43,6 +43,7 @@ export default function TicketWorkspacePage() {
       <TicketResults
         query={query}
         admin={isAdmin}
+        currentUserId={user.id}
         onCreate={() => setQuickCreateOpen(true)}
         onEdit={setEditingTicket}
         onRequestDelete={setDeleteTarget}
@@ -65,14 +66,16 @@ export default function TicketWorkspacePage() {
         />
       )}
 
-      <QuickCreateTicketDialog
-        open={quickCreateOpen}
-        onOpenChange={setQuickCreateOpen}
-        onCreated={() => {
-          toast.success('Ticket created.')
-          query.reload()
-        }}
-      />
+      {!isAdmin && (
+        <QuickCreateTicketDialog
+          open={quickCreateOpen}
+          onOpenChange={setQuickCreateOpen}
+          onCreated={() => {
+            toast.success('Ticket created.')
+            query.reload()
+          }}
+        />
+      )}
 
       <ConfirmDialog
         open={Boolean(deleteTarget)}

@@ -168,6 +168,7 @@ function PriorityProperty({ ticket, admin, busy, onPriorityChange }) {
 export default function TicketList({
   tickets,
   admin = false,
+  currentUserId,
   busyIds,
   sort = { by: 'updated_at', order: 'desc' },
   onSortChange,
@@ -191,6 +192,7 @@ export default function TicketList({
 
   function renderRow(ticket) {
     const busy = busyIds?.has(ticket.id) ?? false
+    const isCreator = (ticket.created_by ?? ticket.user_id) === currentUserId
     const requesterName = ticket.creator_name || ticket.creator_email || 'Unknown'
     const assigneeName = ticket.assignee_name || 'Unassigned'
 
@@ -309,24 +311,32 @@ export default function TicketList({
                   View details
                 </Link>
               </DropdownMenuItem>
-              {!admin && (
+              {admin && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-destructive focus:bg-rose-50 focus:text-destructive"
+                    onClick={() => onDelete?.(ticket)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                    Delete ticket
+                  </DropdownMenuItem>
+                </>
+              )}
+              {!admin && isCreator && (
                 <>
                   <DropdownMenuItem onClick={() => onEdit?.(ticket)}>
                     <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                     Edit ticket
                   </DropdownMenuItem>
-                  {ticket.status === 'open' && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-destructive focus:bg-rose-50 focus:text-destructive"
-                        onClick={() => onDelete?.(ticket)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                        Delete ticket
-                      </DropdownMenuItem>
-                    </>
-                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-destructive focus:bg-rose-50 focus:text-destructive"
+                    onClick={() => onDelete?.(ticket)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                    Delete ticket
+                  </DropdownMenuItem>
                 </>
               )}
             </DropdownMenuContent>

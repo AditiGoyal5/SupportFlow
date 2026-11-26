@@ -20,6 +20,7 @@ import { cn, formatTicketKey } from '../lib/utils.js'
 export default function TicketBoard({
   tickets,
   admin = false,
+  currentUserId,
   busyIds,
   busyTicketId = '',
   onEdit,
@@ -66,6 +67,8 @@ export default function TicketBoard({
               ) : (
                 columnTickets.map((ticket) => {
                   const busy = busyIds?.has(ticket.id) || busyTicketId === ticket.id
+                  const isCreator =
+                    (ticket.created_by ?? ticket.user_id) === currentUserId
                   const requesterName =
                     ticket.creator_name || ticket.creator_email || 'Unknown'
 
@@ -86,7 +89,7 @@ export default function TicketBoard({
                         </Link>
                         <div className="flex items-center gap-1.5">
                           <PriorityBadge priority={ticket.priority} showLabel={false} />
-                          {(admin || ticket.status === 'open') && (
+                          {(admin || isCreator) && (
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button
@@ -122,10 +125,26 @@ export default function TicketBoard({
                                   </>
                                 ) : (
                                   <>
-                                    <DropdownMenuItem onClick={() => onEdit(ticket)}>
-                                      <Pencil className="h-3.5 w-3.5" />
-                                      Edit ticket
+                                    {ticket.status === 'open' && (
+                                      <>
+                                        <DropdownMenuItem onClick={() => onEdit(ticket)}>
+                                          <Pencil className="h-3.5 w-3.5" />
+                                          Edit ticket
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                      </>
+                                    )}
+                                    <DropdownMenuItem
+                                      className="text-destructive focus:bg-rose-50 focus:text-destructive"
+                                      onClick={() => onDelete(ticket)}
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                      Delete ticket
                                     </DropdownMenuItem>
+                                  </>
+                                )}
+                                {admin && (
+                                  <>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
                                       className="text-destructive focus:bg-rose-50 focus:text-destructive"

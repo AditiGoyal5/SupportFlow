@@ -10,6 +10,7 @@ import { Skeleton } from './ui/skeleton.jsx'
 export default function TicketResults({
   query,
   admin = false,
+  currentUserId,
   onCreate,
   onEdit,
   onRequestDelete,
@@ -48,12 +49,12 @@ export default function TicketResults({
             <Button type="button" variant="outline" size="sm" onClick={query.clearFilters}>
               Clear filters
             </Button>
-          ) : (
+          ) : !admin ? (
             <Button type="button" size="sm" onClick={onCreate}>
               <TicketPlus className="h-4 w-4" aria-hidden="true" />
               Create ticket
             </Button>
-          )
+          ) : undefined
         }
       />
     )
@@ -71,6 +72,7 @@ export default function TicketResults({
         <TicketBoard
           tickets={query.tickets}
           admin={admin}
+          currentUserId={currentUserId}
           busyIds={query.busyIds}
           onEdit={onEdit}
           onDelete={onRequestDelete}
@@ -85,6 +87,7 @@ export default function TicketResults({
       <TicketList
         tickets={query.tickets}
         admin={admin}
+        currentUserId={currentUserId}
         busyIds={query.busyIds}
         sort={{ by: query.sortBy, order: query.sortOrder }}
         onSortChange={query.toggleSort}
