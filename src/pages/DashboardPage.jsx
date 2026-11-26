@@ -1,4 +1,4 @@
-import { ArrowRight, Clock3, Ticket } from 'lucide-react'
+import { ArrowRight, Clock3, ShieldCheck, Ticket } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 
@@ -43,7 +43,7 @@ export default function DashboardPage() {
           <div className="grid size-40 place-items-center rounded-full border border-white/10 bg-white/[0.04]">
             <div className="grid size-28 place-items-center rounded-full border border-white/10 bg-white/[0.05]">
               <div className="grid size-[68px] place-items-center rounded-[22px] bg-white/10 text-indigo-100">
-                {isAdmin ? <ShieldCheck size={31} /> : <Ticket size={31} />}
+                <Ticket size={31} />
               </div>
             </div>
           </div>
