@@ -21,15 +21,15 @@ export default function AppLayout() {
     (location.pathname.startsWith('/app/tickets/') ? 'Ticket details' : 'SupportFlow')
 
   return (
-    <div className="min-h-screen bg-[#f7f8fc]">
+    <div className="min-h-screen bg-background">
       <AppSidebar
         user={user}
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
-      <div className="min-h-screen lg:pl-[264px]">
+      <div className="min-h-screen lg:pl-[256px]">
         <AppHeader title={title} onMenuClick={() => setSidebarOpen(true)} />
-        <main className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-7 sm:py-8 lg:px-9">
+        <main className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-7 lg:px-8">
           <Outlet />
         </main>
       </div>

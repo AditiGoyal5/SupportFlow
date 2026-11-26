@@ -1,11 +1,21 @@
 import { useState } from 'react'
-import { LoaderCircle, X } from 'lucide-react'
+import { LoaderCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import api from '../lib/api.js'
 import { getApiErrorMessage } from '../lib/api-error.js'
-
-const inputClassName =
-  'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 outline-none transition focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100'
+import { formatTicketKey } from '../lib/utils.js'
+import { Button } from './ui/button.jsx'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog.jsx'
+import { Input } from './ui/input.jsx'
+import { Label } from './ui/label.jsx'
+import { Textarea } from './ui/textarea.jsx'
 
 export default function EditTicketDialog({ ticket, onClose, onSaved }) {
   const [values, setValues] = useState({
@@ -50,99 +60,84 @@ export default function EditTicketDialog({ ticket, onClose, onSaved }) {
   }
 
   return (
-    <div
-      role="presentation"
-      className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-slate-950/40 p-4 backdrop-blur-[2px]"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget && !saving) onClose()
-      }}
-    >
-      <section
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="edit-ticket-heading"
-        className="my-auto w-full max-w-2xl rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-950/15"
-      >
-        <header className="flex items-start justify-between border-b border-slate-100 px-5 py-4 sm:px-6">
-          <div>
-            <h2 id="edit-ticket-heading" className="text-base font-semibold text-slate-900">
-              Edit ticket
-            </h2>
-            <p className="mt-1 text-xs text-slate-500">
-              Status and priority are managed separately.
-            </p>
+    <Dialog open onOpenChange={(open) => !open && !saving && onClose()}>
+      <DialogContent className="sm:max-w-xl">
+        <DialogHeader>
+          <div className="flex items-center gap-2">
+            <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] font-semibold text-muted-foreground">
+              {formatTicketKey(ticket.id)}
+            </span>
+            <DialogTitle>Edit ticket</DialogTitle>
           </div>
-          <button
-            type="button"
-            aria-label="Close edit ticket"
-            disabled={saving}
-            onClick={onClose}
-            className="grid size-8 place-items-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
-          >
-            <X size={17} />
-          </button>
-        </header>
+          <DialogDescription>
+            Update the summary, category, or description. Status and priority are managed by support.
+          </DialogDescription>
+        </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 p-5 sm:p-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <p role="alert" className="rounded-xl bg-rose-50 px-3.5 py-2.5 text-sm text-rose-700">
+            <p
+              role="alert"
+              className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700"
+            >
               {error}
             </p>
           )}
-          <label className="block text-xs font-semibold text-slate-700">
-            Title
-            <input
+
+          <div className="space-y-1.5">
+            <Label htmlFor="edit-ticket-title">Summary</Label>
+            <Input
+              id="edit-ticket-title"
               name="title"
               required
               maxLength={200}
               value={values.title}
               onChange={updateField}
-              className={inputClassName}
             />
-          </label>
-          <label className="block text-xs font-semibold text-slate-700">
-            Category
-            <input
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="edit-ticket-category">Category</Label>
+            <Input
+              id="edit-ticket-category"
               name="category"
               required
               maxLength={50}
               value={values.category}
               onChange={updateField}
-              className={inputClassName}
             />
-          </label>
-          <label className="block text-xs font-semibold text-slate-700">
-            Description
-            <textarea
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="edit-ticket-description">Description</Label>
+            <Textarea
+              id="edit-ticket-description"
               name="description"
               required
               maxLength={10_000}
               rows={5}
               value={values.description}
               onChange={updateField}
-              className={`${inputClassName} resize-y leading-6`}
+              className="resize-y leading-6"
             />
-          </label>
-          <footer className="flex flex-col-reverse gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
-            <button
+          </div>
+
+          <DialogFooter className="pt-2">
+            <Button
               type="button"
+              variant="outline"
               disabled={saving}
               onClick={onClose}
-              className="h-10 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
             >
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {saving && <LoaderCircle size={16} className="animate-spin" />}
+            </Button>
+            <Button type="submit" disabled={saving}>
+              {saving && <LoaderCircle className="h-4 w-4 animate-spin" />}
               {saving ? 'Saving...' : 'Save changes'}
-            </button>
-          </footer>
+            </Button>
+          </DialogFooter>
         </form>
-      </section>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }

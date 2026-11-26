@@ -1,20 +1,18 @@
-import { LayoutDashboard, Plus, ShieldCheck, Ticket, Users } from 'lucide-react'
+import { LayoutDashboard, Plus, ShieldCheck, Ticket, Users, X } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import Brand from './Brand.jsx'
+import { Button } from './ui/button.jsx'
+import { Separator } from './ui/separator.jsx'
+import { cn } from '../lib/utils.js'
 
 export default function AppSidebar({ user, open, onClose }) {
   const navigation = [
     { label: 'Dashboard', to: '/app', icon: LayoutDashboard, end: true },
-    {
-      label: 'My Tickets',
-      to: '/app/tickets',
-      icon: Ticket,
-      end: true,
-    },
+    { label: 'My Tickets', to: '/app/tickets', icon: Ticket, end: true },
     { label: 'Create Ticket', to: '/app/tickets/new', icon: Plus },
     ...(user.role === 'admin'
       ? [
-          { label: 'Admin Tickets', to: '/app/admin', icon: ShieldCheck },
+          { label: 'Admin Queue', to: '/app/admin', icon: ShieldCheck },
           { label: 'User Management', to: '/app/users', icon: Users },
         ]
       : []),
@@ -31,23 +29,28 @@ export default function AppSidebar({ user, open, onClose }) {
         />
       )}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[264px] flex-col border-r border-slate-200/80 bg-white px-4 py-5 transition-transform duration-200 lg:translate-x-0 ${
-          open ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={cn(
+          'fixed inset-y-0 left-0 z-40 flex w-[256px] flex-col border-r border-border bg-card px-3.5 py-4 transition-transform duration-200 lg:translate-x-0',
+          open ? 'translate-x-0' : '-translate-x-full',
+        )}
       >
-        <div className="flex items-center justify-between px-2 pb-8 pt-1">
+        <div className="flex items-center justify-between px-2 pb-4 pt-1">
           <Brand />
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={onClose}
             aria-label="Close navigation"
-            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 lg:hidden"
+            className="lg:hidden"
           >
-            <span aria-hidden="true" className="text-lg leading-none">×</span>
-          </button>
+            <X className="h-4 w-4" />
+          </Button>
         </div>
 
-        <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.17em] text-slate-400">
+        <Separator className="mb-4" />
+
+        <p className="mb-2 px-2.5 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
           Workspace
         </p>
         <nav aria-label="Main navigation" className="space-y-1">
@@ -58,19 +61,24 @@ export default function AppSidebar({ user, open, onClose }) {
               end={end}
               onClick={onClose}
               className={({ isActive }) =>
-                `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition ${
+                cn(
+                  'group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors',
                   isActive
-                    ? 'bg-indigo-50 text-indigo-700'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`
+                    ? 'bg-indigo-50 text-indigo-700 font-semibold'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                )
               }
             >
               {({ isActive }) => (
                 <>
                   <Icon
-                    size={18}
+                    size={16}
                     strokeWidth={isActive ? 2.2 : 1.8}
-                    className={isActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600'}
+                    className={cn(
+                      isActive
+                        ? 'text-indigo-600'
+                        : 'text-muted-foreground group-hover:text-foreground',
+                    )}
                   />
                   {label}
                 </>
@@ -79,10 +87,10 @@ export default function AppSidebar({ user, open, onClose }) {
           ))}
         </nav>
 
-        <div className="mt-auto rounded-2xl border border-indigo-100 bg-indigo-50/70 p-4">
-          <p className="text-xs font-semibold text-indigo-900">Support, made simple</p>
-          <p className="mt-1.5 text-xs leading-5 text-indigo-800/75">
-            Keep your requests and team updates together in one workspace.
+        <div className="mt-auto rounded-xl border border-indigo-100 bg-indigo-50/60 p-3.5">
+          <p className="text-xs font-semibold text-indigo-950">Support, made simple</p>
+          <p className="mt-1 text-[11px] leading-4 text-indigo-900/75">
+            Track issues in List or Board view and collaborate with your team.
           </p>
         </div>
       </aside>

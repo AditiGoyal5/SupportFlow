@@ -1,8 +1,19 @@
-import { Bell, LogOut, Menu, Search } from 'lucide-react'
+import { Bell, LogOut, Menu, Plus, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext.jsx'
+import { Avatar, AvatarFallback } from './ui/avatar.jsx'
+import { Button } from './ui/button.jsx'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu.jsx'
+import { Input } from './ui/input.jsx'
 
 function initials(name = '') {
   return name
@@ -37,75 +48,94 @@ export default function AppHeader({ title, onMenuClick }) {
   }
 
   return (
-    <header className="sticky top-0 z-20 flex h-[76px] items-center justify-between border-b border-slate-200/80 bg-white/90 px-4 backdrop-blur-md sm:px-7 lg:px-9">
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b border-border bg-card/90 px-4 backdrop-blur-md sm:px-6 lg:px-8">
       <div className="flex min-w-0 items-center gap-3">
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="icon-sm"
           aria-label="Open navigation"
           onClick={onMenuClick}
-          className="rounded-xl border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-50 lg:hidden"
+          className="lg:hidden"
         >
-          <Menu size={19} />
-        </button>
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-            SupportFlow
-          </p>
-          <h1 className="truncate text-base font-semibold tracking-[-0.02em] text-slate-900 sm:text-lg">
-            {title}
-          </h1>
-        </div>
+          <Menu className="h-4 w-4" />
+        </Button>
+        <h2 className="truncate text-sm font-semibold text-foreground sm:text-base">
+          {title}
+        </h2>
       </div>
 
-      <form
-        role="search"
-        onSubmit={handleSearch}
-        className="relative mx-6 hidden w-full max-w-[360px] flex-1 md:block"
-      >
-        <Search
-          aria-hidden="true"
-          size={17}
-          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-        />
-        <input
+      <form onSubmit={handleSearch} className="relative hidden max-w-sm flex-1 md:block">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+        <Input
           type="search"
           aria-label="Search tickets"
           placeholder="Search tickets..."
           value={searchValue}
           onChange={(event) => setSearchValue(event.target.value)}
-          className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-300 focus:bg-white focus:ring-4 focus:ring-indigo-100/70"
+          className="h-9 bg-muted/50 pl-8.5"
         />
       </form>
 
-      <div className="flex shrink-0 items-center gap-2.5 sm:gap-4">
-        <button
+      <div className="flex shrink-0 items-center gap-2">
+        {user.role !== 'admin' && (
+          <Button asChild size="sm" className="hidden sm:inline-flex">
+            <Link to="/app/tickets/new">
+              <Plus className="h-3.5 w-3.5" />
+              New ticket
+            </Link>
+          </Button>
+        )}
+
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           aria-label="Notifications"
-          className="relative grid size-10 place-items-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+          className="text-muted-foreground"
         >
-          <Bell size={19} strokeWidth={1.8} />
-        </button>
-        <span className="hidden h-8 w-px bg-slate-200 sm:block" />
-        <div className="hidden items-center gap-3 sm:flex">
-          <span className="grid size-10 place-items-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700">
-            {initials(user.name)}
-          </span>
-          <div className="max-w-[170px]">
-            <p className="truncate text-sm font-semibold text-slate-800">{user.name}</p>
-            <p className="truncate text-xs capitalize text-slate-500">{user.role}</p>
-          </div>
-        </div>
-        <span className="grid size-9 place-items-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700 sm:hidden">
-          {initials(user.name)}
-        </span>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 sm:text-sm"
-        >
-          <LogOut size={16} />
-          <span className="hidden sm:inline">Sign out</span>
-        </button>
+          <Bell className="h-4 w-4" />
+        </Button>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-9 gap-2.5 rounded-full px-1.5 sm:rounded-lg sm:px-2"
+            >
+              <Avatar className="h-7 w-7">
+                <AvatarFallback className="text-[11px]">
+                  {initials(user.name)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="hidden max-w-[140px] text-left sm:block">
+                <p className="truncate text-xs font-semibold leading-none text-foreground">
+                  {user.name}
+                </p>
+                <p className="mt-0.5 truncate text-[11px] capitalize leading-none text-muted-foreground">
+                  {user.role}
+                </p>
+              </div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuLabel>
+              <p className="truncate text-xs font-semibold text-foreground">{user.name}</p>
+              <p className="truncate text-[11px] font-normal text-muted-foreground">
+                {user.email}
+              </p>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className="text-destructive focus:bg-rose-50 focus:text-destructive"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   )

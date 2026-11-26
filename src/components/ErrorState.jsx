@@ -1,32 +1,27 @@
-import { AlertCircle, RefreshCw } from 'lucide-react'
+import { AlertTriangle, RotateCcw } from 'lucide-react'
+import { Button } from './ui/button.jsx'
+import { Card } from './ui/card.jsx'
 
-export default function ErrorState({
-  title = 'Something went wrong',
-  message = 'We could not load this information. Please try again.',
-  onRetry,
-}) {
+export default function ErrorState({ title, message, onRetry }) {
   return (
-    <section
-      role="alert"
-      className="rounded-2xl border border-rose-200 bg-white px-5 py-8 text-center shadow-sm shadow-rose-100/50"
-    >
-      <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-rose-50 text-rose-600">
-        <AlertCircle size={22} />
-      </span>
-      <h3 className="mt-4 text-base font-semibold text-slate-900">{title}</h3>
-      <p className="mx-auto mt-1.5 max-w-lg text-sm leading-6 text-slate-500">
-        {message}
-      </p>
-      {onRetry && (
-        <button
-          type="button"
-          onClick={onRetry}
-          className="mt-5 inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-indigo-100"
-        >
-          <RefreshCw size={15} />
-          Try again
-        </button>
+    <Card className="border-rose-200 bg-rose-50/40 px-6 py-10 text-center">
+      <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-rose-100 text-rose-600">
+        <AlertTriangle size={20} />
+      </div>
+      <h3 className="mt-4 text-sm font-semibold text-foreground">{title}</h3>
+      {message && (
+        <p className="mx-auto mt-1.5 max-w-md text-xs leading-5 text-muted-foreground">
+          {message}
+        </p>
       )}
-    </section>
+      {onRetry && (
+        <div className="mt-5 flex justify-center">
+          <Button type="button" variant="outline" size="sm" onClick={onRetry}>
+            <RotateCcw size={14} />
+            Try again
+          </Button>
+        </div>
+      )}
+    </Card>
   )
 }
