@@ -6,7 +6,7 @@ export const AUTH_EXPIRED_EVENT = 'supportflow:auth-expired'
 let expirationEventDispatched = false
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
