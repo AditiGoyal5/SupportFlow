@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext.jsx'
 import { Avatar, AvatarFallback } from './ui/avatar.jsx'
 import { Button } from './ui/button.jsx'
+import ThemeToggle from './ThemeToggle.jsx'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -78,6 +79,8 @@ export default function AppHeader({ title, onMenuClick }) {
       </form>
 
       <div className="flex shrink-0 items-center gap-2">
+        <ThemeToggle />
+
         {user.role !== 'admin' && (
           <Button asChild size="sm" className="hidden sm:inline-flex">
             <Link to="/app/tickets/new">

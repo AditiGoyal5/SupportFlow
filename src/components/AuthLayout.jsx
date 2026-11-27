@@ -1,5 +1,6 @@
 import { ArrowUpRight, Check } from 'lucide-react'
 import Brand from './Brand.jsx'
+import ThemeToggle from './ThemeToggle.jsx'
 
 const benefits = [
   'One clear place for every support request',
@@ -55,7 +56,8 @@ export default function AuthLayout({ children }) {
         </div>
       </aside>
 
-      <main className="flex min-h-screen flex-col items-center justify-center px-5 py-8 sm:px-8 lg:px-12">
+      <main className="relative flex min-h-screen flex-col items-center justify-center px-5 py-8 sm:px-8 lg:px-12">
+        <ThemeToggle className="absolute right-5 top-5 sm:right-8 lg:right-12 lg:top-8" />
         <div className="mb-9 w-full max-w-[440px] lg:hidden">
           <Brand />
         </div>
