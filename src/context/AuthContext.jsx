@@ -17,6 +17,7 @@ function saveAuthResponse(data) {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [loadingLabel, setLoadingLabel] = useState('Getting things ready for you')
 
   useEffect(() => {
     let active = true
@@ -28,35 +29,45 @@ export function AuthProvider({ children }) {
     }
 
     window.addEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired)
-    const token = window.localStorage.getItem(TOKEN_STORAGE_KEY)
-
-    if (!token) {
-      setLoading(false)
-      return () => {
-        active = false
-        window.removeEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired)
-      }
-    }
-
-    api
-      .get('/auth/me')
-      .then(({ data }) => {
-        if (active) setUser(data.user)
-      })
-      .catch((error) => {
-        if (!active) return
-
-        if (error.response?.status === 401) {
-          return
+    async function initialize() {
+      while (active) {
+        try {
+          await api.get('/health')
+          break
+        } catch {
+          await new Promise((resolve) => {
+            window.setTimeout(resolve, 2000)
+          })
         }
+
+        if (!active) return
+      }
+
+      if (!active) return
+
+      const token = window.localStorage.getItem(TOKEN_STORAGE_KEY)
+      if (!token) {
+        setLoading(false)
+        return
+      }
+
+      setLoadingLabel('Checking your session')
+
+      try {
+        const { data } = await api.get('/auth/me')
+        if (active) setUser(data.user)
+      } catch (error) {
+        if (!active || error.response?.status === 401) return
 
         toast.error(
           getApiErrorMessage(error, 'Could not verify your session. Please try again.'),
         )
-      })
-      .finally(() => {
+      } finally {
         if (active) setLoading(false)
-      })
+      }
+    }
+
+    initialize()
 
     return () => {
       active = false
@@ -84,6 +95,7 @@ export function AuthProvider({ children }) {
       value={{
         user,
         loading,
+        loadingLabel,
         login,
         register,
         logout,

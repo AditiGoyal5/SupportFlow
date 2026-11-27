@@ -13,16 +13,16 @@ import TicketWorkspacePage from './pages/TicketWorkspacePage.jsx'
 import UserManagementPage from './pages/UserManagementPage.jsx'
 
 function RequireAuth() {
-  const { user, loading } = useAuth()
+  const { user, loading, loadingLabel } = useAuth()
 
-  if (loading) return <LoadingScreen label="Checking your session" />
+  if (loading) return <LoadingScreen label={loadingLabel} />
   return user ? <Outlet /> : <Navigate to="/login" replace />
 }
 
 function PublicOnly() {
-  const { user, loading } = useAuth()
+  const { user, loading, loadingLabel } = useAuth()
 
-  if (loading) return <LoadingScreen label="Checking your session" />
+  if (loading) return <LoadingScreen label={loadingLabel} />
   return user ? <Navigate to="/app" replace /> : <Outlet />
 }
 
@@ -32,9 +32,9 @@ function RequireRole({ role }) {
 }
 
 function HomeRedirect() {
-  const { user, loading } = useAuth()
+  const { user, loading, loadingLabel } = useAuth()
 
-  if (loading) return <LoadingScreen label="Loading SupportFlow" />
+  if (loading) return <LoadingScreen label={loadingLabel} />
   return <Navigate to={user ? '/app' : '/login'} replace />
 }
 
