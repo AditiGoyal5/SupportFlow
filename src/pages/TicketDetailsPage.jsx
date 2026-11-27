@@ -779,7 +779,7 @@ export default function TicketDetailsPage() {
                     disabled={updatingField}
                     onValueChange={(value) => updateManagedField('status', value)}
                   >
-                    <SelectTrigger className="h-8 w-[145px] text-xs font-medium">
+                    <SelectTrigger className="h-8 w-[145px] text-[11px] font-medium">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -811,7 +811,7 @@ export default function TicketDetailsPage() {
                     disabled={updatingField}
                     onValueChange={(value) => updateManagedField('priority', value)}
                   >
-                    <SelectTrigger className="h-8 w-[145px] text-xs font-medium">
+                    <SelectTrigger className="h-8 w-[145px] text-[11px] font-medium">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -886,7 +886,7 @@ export default function TicketDetailsPage() {
                   >
                     <SelectTrigger
                       aria-label="Ticket assignee"
-                      className="h-8 w-[180px] text-xs font-medium"
+                      className="h-8 w-[180px] text-[11px] font-medium"
                     >
                       <SelectValue
                         placeholder={

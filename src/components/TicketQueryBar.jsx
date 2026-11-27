@@ -124,7 +124,7 @@ export default function TicketQueryBar({ query, children }) {
         <div className="relative">
           <Search
             aria-hidden="true"
-            className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute left-3 top-[calc(50%+1px)] h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
           />
           <Input
             type="search"
@@ -132,7 +132,7 @@ export default function TicketQueryBar({ query, children }) {
             placeholder="Search by key, title, or description..."
             value={query.searchDraft}
             onChange={(event) => query.setSearchDraft(event.target.value)}
-            className="h-8 pl-8.5 text-xs"
+            className="h-8 pl-8.5 text-xs placeholder:text-[11px]"
           />
         </div>
 

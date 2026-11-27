@@ -156,7 +156,7 @@ export default function CreateTicketPage() {
                   aria-invalid={Boolean(errors.title)}
                   aria-describedby={errors.title ? 'title-error' : undefined}
                   className={cn(
-                    'h-10 text-sm',
+                    'h-10 text-sm placeholder:text-xs',
                     errors.title && 'border-destructive focus-visible:ring-destructive',
                   )}
                 />
@@ -179,15 +179,15 @@ export default function CreateTicketPage() {
                 <Textarea
                   id="ticket-description"
                   ref={descriptionRef}
-                  rows={10}
+                  rows={6}
                   maxLength={DESCRIPTION_MAX_LENGTH}
                   placeholder="What were you trying to do? What happened instead? Include steps to reproduce if you can."
                   value={values.description}
                   onChange={(event) => updateField('description', event.target.value)}
                   aria-invalid={Boolean(errors.description)}
-                  aria-describedby={errors.description ? 'description-error' : 'description-hint'}
+                  aria-describedby={errors.description ? 'description-error' : undefined}
                   className={cn(
-                    'min-h-56 resize-y leading-6',
+                    'min-h-56 resize-y leading-6 placeholder:text-xs',
                     errors.description && 'border-destructive focus-visible:ring-destructive',
                   )}
                 />
@@ -195,11 +195,7 @@ export default function CreateTicketPage() {
                   <p id="description-error" className="text-xs text-destructive">
                     {errors.description}
                   </p>
-                ) : (
-                  <p id="description-hint" className="text-xs text-muted-foreground">
-                    Markdown-style formatting and links are welcome.
-                  </p>
-                )}
+                ) : null}
               </div>
             </div>
           </Card>
@@ -235,9 +231,12 @@ export default function CreateTicketPage() {
                     id="ticket-category"
                     ref={categoryRef}
                     aria-invalid={Boolean(errors.category)}
-                    className={cn(errors.category && 'border-destructive')}
+                    className={cn(
+                      '[&>span]:text-xs text-xs',
+                       errors.category && 'border-destructive',
+                    )}
                   >
-                    <SelectValue placeholder="Select a category" />
+                    <SelectValue className="text-xs" placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
                     {CATEGORY_OPTIONS.map((option) => (

@@ -102,7 +102,10 @@ export default function QuickCreateTicketDialog({ open, onOpenChange, onCreated 
               onChange={(event) => updateField('title', event.target.value)}
               aria-invalid={Boolean(errors.title)}
               aria-describedby={errors.title ? 'quick-title-error' : undefined}
-              className={cn(errors.title && 'border-destructive focus-visible:ring-destructive')}
+              className={cn(
+                'placeholder:text-xs',
+                errors.title && 'border-destructive focus-visible:ring-destructive',
+              )}
             />
             {errors.title && (
               <p id="quick-title-error" className="text-xs text-destructive">
@@ -121,7 +124,10 @@ export default function QuickCreateTicketDialog({ open, onOpenChange, onCreated 
                 <SelectTrigger
                   id="quick-ticket-category"
                   aria-invalid={Boolean(errors.category)}
-                  className={cn('h-9', errors.category && 'border-destructive')}
+                  className={cn(
+                   '[&>span]:text-xs text-xs',
+                   errors.category && 'border-destructive',
+                  )}
                 >
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
@@ -188,7 +194,7 @@ export default function QuickCreateTicketDialog({ open, onOpenChange, onCreated 
               onChange={(event) => updateField('description', event.target.value)}
               aria-invalid={Boolean(errors.description)}
               className={cn(
-                'min-h-24 resize-y',
+                'min-h-24 resize-y placeholder:text-xs',
                 errors.description && 'border-destructive focus-visible:ring-destructive',
               )}
             />
