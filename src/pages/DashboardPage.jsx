@@ -89,13 +89,6 @@ export default function DashboardPage() {
           />
         </div>
       </section>
-
-      <section className="rounded-2xl border border-dashed border-slate-300 bg-white/70 px-5 py-6 text-center sm:px-8 sm:py-8">
-        <p className="text-sm font-semibold text-slate-800">You’re all set</p>
-        <p className="mx-auto mt-1.5 max-w-lg text-sm leading-6 text-slate-500">
-          Use the workspace navigation to continue. Ticket activity and dashboard metrics will populate as you work.
-        </p>
-      </section>
     </div>
   )
 }
